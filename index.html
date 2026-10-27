@@ -95,6 +95,32 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 .shot { position: relative; margin-inline: auto; border-radius: 14px; overflow: hidden; box-shadow: var(--shot-shadow); background: #0e0e13; }
 .shot img { width: 100%; height: auto; aspect-ratio: 14 / 9; }
 .gallery .shot img { aspect-ratio: 3 / 2; } /* gallery shots are 3:2 crops of one feature */
+
+/* ---- interactive shots: hotspots to hover or tap, and a viewer to open any shot full size */
+.shot img, .thumb img { cursor: zoom-in; }
+.shot img:focus-visible, .thumb img:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.shot::after { content: "⤢"; position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(14, 14, 19, .72); color: #fff; font-size: 17px; opacity: 0; transform: scale(.8); transition: opacity .25s, transform .25s var(--ease); pointer-events: none; }
+.shot:hover::after { opacity: 1; transform: none; }
+.hs { position: absolute; left: var(--x); top: var(--y); z-index: 1; width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0; border: 2px solid #fff; border-radius: 50%; background: var(--accent); box-shadow: 0 4px 14px rgba(0, 0, 0, .5); cursor: pointer; }
+.hs::before { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: var(--accent); animation: ping 2.2s var(--ease) infinite; z-index: -1; }
+@keyframes ping { 70%, 100% { transform: scale(2.3); opacity: 0; } }
+.hs span { --tx: -50%; position: absolute; bottom: calc(100% + 12px); left: 50%; width: max-content; max-width: min(260px, 62vw); padding: 10px 13px; border-radius: 12px; background: rgba(14, 14, 19, .94); color: #fff; font: 500 14px/1.4 var(--font); text-align: left; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 14px 30px -10px rgba(0, 0, 0, .7); transform: translate(var(--tx), 6px); opacity: 0; visibility: hidden; transition: opacity .2s, transform .2s var(--ease), visibility .2s; pointer-events: none; }
+.hs.l span { --tx: 0%; left: -12px; }
+.hs.r span { --tx: 0%; left: auto; right: -12px; }
+.hs:hover span, .hs:focus span { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); }
+.hs:hover, .hs:focus { z-index: 2; }
+.lb { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(6, 6, 10, .94); color: #fff; }
+.lb::backdrop { background: transparent; }
+.lb[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+html:has(.lb[open]) { overflow: hidden; }
+.lb-stage { display: grid; place-items: safe center; overflow: auto; padding: 60px 72px 0; scrollbar-width: none; }
+.lb-stage::-webkit-scrollbar { display: none; }
+.lb-stage img { max-width: 100%; max-height: calc(100dvh - 130px); border-radius: 12px; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .8); cursor: zoom-in; user-select: none; -webkit-user-drag: none; }
+.lb.zoomed .lb-stage { padding: 0; cursor: grab; }
+.lb.zoomed .lb-stage img { max-width: none; max-height: none; border-radius: 0; cursor: zoom-out; }
+.lb-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px 20px 22px; font-size: 15px; color: rgba(255, 255, 255, .78); text-align: center; }
+.lb .circle { flex: none; background: rgba(255, 255, 255, .1); color: #fff; box-shadow: none; }
+.lb-x { position: absolute; top: 14px; right: 14px; z-index: 1; }
 .hero-shot { max-width: 1180px; margin-top: 56px; }
 .glow { position: relative; }
 .glow::before { content: ""; position: absolute; inset: 8% 10% -6%; background: radial-gradient(50% 50% at 30% 50%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%), radial-gradient(45% 50% at 72% 55%, color-mix(in srgb, var(--accent-2) 38%, transparent), transparent 70%); filter: blur(60px); z-index: -1; opacity: .7; }
@@ -180,7 +206,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     @keyframes zoom { from { transform: scale(.88) perspective(1200px) rotateX(10deg); opacity: .4; } }
   }
 }
-@media (prefers-reduced-motion: reduce) { .load-in > * { animation: none; } html { scroll-behavior: auto; } .tile, .pill, .circle { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .load-in > * { animation: none; } html { scroll-behavior: auto; } .tile, .pill, .circle { transition: none; } .hs::before { animation: none; } }
 
 @media (max-width: 860px) {
   .nav-links { display: none; }
@@ -192,6 +218,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   .plans { grid-template-columns: minmax(0, 1fr); }
   .gallery { grid-auto-columns: 88%; }
   .band { padding-block: 80px 24px; }
+  .hs { width: 16px; height: 16px; margin: -8px 0 0 -8px; }
+  .hs span { font-size: 13px; }
+  .lb-stage { padding: 56px 12px 0; }
 }
 </style>
 <!--/head-->
@@ -219,7 +248,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <p class="fine">Free · Windows, macOS and Linux · Uses your free Hypixel API key</p>
     </div>
     <div class="wrap wide">
-      <div class="glow"><div class="shot hero-shot zoom"><img src="img/overview.jpg" alt="SkyView showing a player's overview: SkyBlock level, networth, skills and equipped gear" width="1400" height="900" fetchpriority="high"></div></div>
+      <div class="glow"><div class="shot hero-shot zoom"><img src="img/overview.jpg" srcset="img/overview.jpg 1x, img/overview@2x.jpg 2x" alt="SkyView showing a player's overview: SkyBlock level, networth, skills and equipped gear" width="1400" height="900" fetchpriority="high">
+        <button type="button" class="hs" style="--x: 27.5%; --y: 27%"><span>Their skin in 3D, with the gear they have on around it.</span></button>
+        <button type="button" class="hs" style="--x: 62%; --y: 33.5%"><span>Networth, purse, bank, skill average, Catacombs and fairy souls at a glance.</span></button>
+        <button type="button" class="hs l" style="--x: 7.6%; --y: 17.8%"><span>Every page for this profile, with its number right on the button.</span></button>
+        <button type="button" class="hs r" style="--x: 80.2%; --y: 61%"><span>Their other wardrobe sets. See all opens the Gear page.</span></button></div></div>
     </div>
   </section>
 
@@ -238,7 +271,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">Every coin,<br>accounted for.</h2>
       <p class="lede reveal">Networth comes from live Bazaar and Auction House prices and refreshes while SkyView is open. It's split by where it sits, from wardrobe to pets, and any part opens an item-by-item breakdown.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/networth.jpg" alt="The Networth page: totals, a breakdown bar and the most valuable items in each category" width="1400" height="900" loading="lazy"></div></div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/networth.jpg" srcset="img/networth.jpg 1x, img/networth@2x.jpg 2x" alt="The Networth page: totals, a breakdown bar and the most valuable items in each category" width="1400" height="900" loading="lazy">
+      <button type="button" class="hs" style="--x: 29.5%; --y: 23%"><span>Total networth, plus what's left without soulbound or cosmetic items.</span></button>
+      <button type="button" class="hs" style="--x: 45%; --y: 41%"><span>Where it all sits, from inventory to sacks. Click a part for its items.</span></button>
+      <button type="button" class="hs" style="--x: 22.8%; --y: 70%"><span>Every item priced from live Bazaar and Auction House data.</span></button></div></div>
   </section>
 
   <section class="band tint">
@@ -247,7 +283,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">It looks like<br>your game.</h2>
       <p class="lede reveal">Items are drawn with FurfSky Reborn, Hypixel+ and SkyBlock Legacy, the packs you already use in game, down to animated textures and 3D models. Add your own packs or pick more from Modrinth.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/gear.jpg" alt="The Gear page with armour, equipment and loadouts drawn in FurfSky textures" width="1400" height="900" loading="lazy"></div></div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/gear.jpg" srcset="img/gear.jpg 1x, img/gear@2x.jpg 2x" alt="The Gear page with armour, equipment and loadouts drawn in FurfSky textures" width="1400" height="900" loading="lazy">
+      <button type="button" class="hs" style="--x: 29.5%; --y: 25.3%"><span>Armour and equipment drawn with your texture pack, FurfSky Reborn here.</span></button>
+      <button type="button" class="hs" style="--x: 34.9%; --y: 49.7%"><span>Every wardrobe slot, with the set they're wearing marked.</span></button>
+      <button type="button" class="hs r" style="--x: 87.4%; --y: 79.6%"><span>Weapons and tools with their stars, reforge and upgrades.</span></button></div></div>
     <div class="wrap">
       <div class="points">
         <div class="reveal"><h3>Inventories</h3><p>Inventory, ender chest, backpacks, wardrobe, sacks and the accessory bag, with hover tooltips in the game's own colours.</p></div>
@@ -282,7 +321,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">Play SkyBlock<br>straight from SkyView.</h2>
       <p class="lede reveal">Pick your mods, press Install, and SkyView sets up its own Minecraft with Fabric, Skyblocker, SkyHanni, Sodium and more. Sign in on Microsoft's own page; SkyView keeps only an encrypted sign-in token on your computer.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/mods.jpg" alt="The Mods tab with SkyBlock and performance mods to switch on" width="1400" height="900" loading="lazy"></div></div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/mods.jpg" srcset="img/mods.jpg 1x, img/mods@2x.jpg 2x" alt="The Mods tab with SkyBlock and performance mods to switch on" width="1400" height="900" loading="lazy">
+      <button type="button" class="hs r" style="--x: 88.6%; --y: 21.8%"><span>Install sets up Minecraft, Java, Fabric and your mods in their own folder. Then press Play.</span></button>
+      <button type="button" class="hs" style="--x: 29.2%; --y: 46.4%"><span>Sign in on Microsoft's own page. Only an encrypted sign-in token is kept.</span></button>
+      <button type="button" class="hs" style="--x: 42.7%; --y: 76%"><span>Switch any mod on or off before you play.</span></button></div></div>
   </section>
 
   <section id="gallery">
@@ -366,6 +408,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
 </footer>
 
+<dialog class="lb" id="lb" aria-label="Screenshot">
+  <button type="button" class="circle lb-x" data-lb="0" aria-label="Close">×</button>
+  <div class="lb-stage"><img alt=""></div>
+  <div class="lb-bar"><button type="button" class="circle" data-lb="-1" aria-label="Previous screenshot">‹</button><span id="lbCap"></span><button type="button" class="circle" data-lb="1" aria-label="Next screenshot">›</button></div>
+</dialog>
+
 <script>
 // Fill these in: where the downloads live (a public GitHub releases page), and the checkout link
 // for Pro (Gumroad, Lemon Squeezy or a Stripe payment link). Pro stays "Coming soon" until then.
@@ -399,6 +447,69 @@ document.querySelectorAll('[data-gal]').forEach((b) => b.addEventListener('click
   gal.scrollBy({ left: Number(b.dataset.gal) * step, behavior: 'smooth' });
 }));
 document.getElementById('year').textContent = new Date().getFullYear();
+
+// Screenshot viewer: click a shot to open it full size, click again to zoom in, drag to pan, arrows to move on.
+const lb = document.getElementById('lb');
+const stage = lb.querySelector('.lb-stage');
+const lbImg = stage.querySelector('img');
+const shots = [...document.querySelectorAll('.shot img, .thumb img')];
+let at = 0;
+let drag = null;
+const showShot = (i) => {
+  at = (i + shots.length) % shots.length;
+  const img = shots[at];
+  lb.classList.remove('zoomed');
+  lbImg.style.width = '';
+  lbImg.src = img.currentSrc || img.src;
+  lbImg.alt = img.alt;
+  const fig = img.closest('figure');
+  document.getElementById('lbCap').textContent = fig ? fig.querySelector('figcaption').textContent : img.alt;
+  const hi = new Image(); // every shot has a 2x copy next to it
+  hi.onload = () => { if (shots[at] === img) lbImg.src = hi.src; };
+  hi.src = img.getAttribute('src').replace(/\.jpg$/, '@2x.jpg');
+};
+const openShot = (i) => { showShot(i); lb.showModal(); };
+shots.forEach((img, i) => {
+  img.tabIndex = 0;
+  img.setAttribute('role', 'button');
+  img.setAttribute('aria-haspopup', 'dialog');
+  img.addEventListener('click', () => openShot(i));
+  img.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openShot(i); } });
+});
+lb.querySelectorAll('[data-lb]').forEach((b) => b.addEventListener('click', () => {
+  const step = Number(b.dataset.lb);
+  if (step) showShot(at + step); else lb.close();
+}));
+lb.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') showShot(at + 1);
+  else if (e.key === 'ArrowLeft') showShot(at - 1);
+});
+stage.addEventListener('click', (e) => { if (e.target === stage && !lb.classList.contains('zoomed')) lb.close(); });
+lbImg.addEventListener('click', (e) => {
+  if (drag && drag.moved) return;
+  const r = lbImg.getBoundingClientRect();
+  const fx = (e.clientX - r.left) / r.width;
+  const fy = (e.clientY - r.top) / r.height;
+  if (lb.classList.toggle('zoomed')) {
+    lbImg.style.width = `${Math.round(r.width * 2.2)}px`;
+    const s = stage.getBoundingClientRect();
+    stage.scrollLeft = fx * lbImg.offsetWidth - (e.clientX - s.left);
+    stage.scrollTop = fy * lbImg.offsetHeight - (e.clientY - s.top);
+  } else lbImg.style.width = '';
+});
+// mouse drag pans a zoomed shot; touch already scrolls it natively
+stage.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && lb.classList.contains('zoomed')) drag = { x: e.clientX, y: e.clientY, l: stage.scrollLeft, t: stage.scrollTop, moved: false };
+});
+stage.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x;
+  const dy = e.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+  stage.scrollLeft = drag.l - dx;
+  stage.scrollTop = drag.t - dy;
+});
+window.addEventListener('pointerup', () => setTimeout(() => { drag = null; }));
 </script>
 <!--/body-->
 </body>
