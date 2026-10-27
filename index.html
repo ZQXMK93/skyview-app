@@ -99,16 +99,21 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 /* ---- interactive shots: hotspots to hover or tap, and a viewer to open any shot full size */
 .shot img, .thumb img { cursor: zoom-in; }
 .shot img:focus-visible, .thumb img:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
-.shot::after { content: "⤢"; position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(14, 14, 19, .72); color: #fff; font-size: 17px; opacity: 0; transform: scale(.8); transition: opacity .25s, transform .25s var(--ease); pointer-events: none; }
-.shot:hover::after { opacity: 1; transform: none; }
-.hs { position: absolute; left: var(--x); top: var(--y); z-index: 1; width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0; border: 2px solid #fff; border-radius: 50%; background: var(--accent); box-shadow: 0 4px 14px rgba(0, 0, 0, .5); cursor: pointer; }
-.hs::before { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: var(--accent); animation: ping 2.2s var(--ease) infinite; z-index: -1; }
-@keyframes ping { 70%, 100% { transform: scale(2.3); opacity: 0; } }
-.hs span { --tx: -50%; position: absolute; bottom: calc(100% + 12px); left: 50%; width: max-content; max-width: min(260px, 62vw); padding: 10px 13px; border-radius: 12px; background: rgba(14, 14, 19, .94); color: #fff; font: 500 14px/1.4 var(--font); text-align: left; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 14px 30px -10px rgba(0, 0, 0, .7); transform: translate(var(--tx), 6px); opacity: 0; visibility: hidden; transition: opacity .2s, transform .2s var(--ease), visibility .2s; pointer-events: none; }
-.hs.l span { --tx: 0%; left: -12px; }
-.hs.r span { --tx: 0%; left: auto; right: -12px; }
-.hs:hover span, .hs:focus span { opacity: 1; visibility: visible; transform: translate(var(--tx), 0); }
-.hs:hover, .hs:focus { z-index: 2; }
+.shot::after { content: "Click to enlarge"; position: absolute; right: 14px; bottom: 14px; padding: 6px 12px; border-radius: 999px; background: rgba(14, 14, 19, .8); color: #fff; font: 600 12.5px var(--font); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); opacity: 0; translate: 0 6px; transition: opacity .25s, translate .25s var(--ease); pointer-events: none; }
+.shot:hover::after { opacity: 1; translate: 0 0; }
+/* Feature spotlights: the part of the screenshot a feature is about stays lit, the rest dims. */
+.spot-hl { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 12px; pointer-events: none; opacity: 0; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 80%, #fff), 0 0 26px 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 0 0 200vmax rgba(6, 6, 10, .6); transition: left .55s var(--ease), top .55s var(--ease), width .55s var(--ease), height .55s var(--ease), opacity .35s; }
+.spotlight.lit .spot-hl { opacity: 1; }
+.spots { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; max-width: 1080px; margin: 18px auto 0; text-align: left; }
+.hero-spots { --n: 4; max-width: 1180px; }
+.spot { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; border: 0; border-radius: 16px; background: var(--card); color: var(--fg); box-shadow: 0 0 0 1px var(--line); font: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: box-shadow .25s, background .25s, transform .3s var(--ease); }
+.spot .n { font: 700 12px var(--font); letter-spacing: .04em; color: var(--accent); }
+.spot b { font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; }
+.spot span:last-child { font-size: 13.5px; line-height: 1.45; color: var(--fg-2); }
+.spot:hover { transform: translateY(-2px); }
+.spot.on { background: color-mix(in srgb, var(--accent) 7%, var(--card)); box-shadow: 0 0 0 2px var(--accent), 0 16px 34px -22px color-mix(in srgb, var(--accent) 80%, transparent); }
+.spot.auto::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 3px; background: var(--accent); transform-origin: left; animation: spot-timer 4.2s linear forwards; }
+@keyframes spot-timer { from { transform: scaleX(0); } }
 .lb { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(6, 6, 10, .94); color: #fff; }
 .lb::backdrop { background: transparent; }
 .lb[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
@@ -143,7 +148,7 @@ html:has(.lb[open]) { overflow: hidden; }
 /* ---- bento */
 .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: 48px; text-align: left; }
 .tile { grid-column: span 2; position: relative; display: flex; flex-direction: column; gap: 8px; min-height: 220px; padding: 28px; border-radius: 22px; background: var(--card); box-shadow: 0 0 0 1px var(--line); overflow: hidden; transition: transform .5s var(--ease), box-shadow .3s; }
-.tile:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 0 0 1px var(--line), 0 20px 40px -24px rgba(0, 0, 0, .35); }
+.tile:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--line), 0 20px 40px -24px rgba(0, 0, 0, .35); }
 .tile.w3 { grid-column: span 3; }
 .tile.w4 { grid-column: span 4; }
 .tile .k { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0; text-transform: uppercase; }
@@ -203,10 +208,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
     .zoom { animation: zoom linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
     @keyframes reveal { from { opacity: .15; transform: translateY(40px); } }
-    @keyframes zoom { from { transform: scale(.88) perspective(1200px) rotateX(10deg); opacity: .4; } }
+    @keyframes zoom { from { translate: 0 48px; opacity: .35; } }
   }
 }
-@media (prefers-reduced-motion: reduce) { .load-in > * { animation: none; } html { scroll-behavior: auto; } .tile, .pill, .circle { transition: none; } .hs::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .load-in > * { animation: none; } html { scroll-behavior: auto; } .tile, .pill, .circle { transition: none; } .spot, .spot-hl { transition: none; } .spot.auto::after { animation: none; } }
 
 @media (max-width: 860px) {
   .nav-links { display: none; }
@@ -218,8 +223,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   .plans { grid-template-columns: minmax(0, 1fr); }
   .gallery { grid-auto-columns: 88%; }
   .band { padding-block: 80px 24px; }
-  .hs { width: 16px; height: 16px; margin: -8px 0 0 -8px; }
-  .hs span { font-size: 13px; }
+  .spots, .hero-spots { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .spot { scroll-snap-align: start; }
   .lb-stage { padding: 56px 12px 0; }
 }
 </style>
@@ -248,11 +253,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <p class="fine">Free · Windows, macOS and Linux · Uses your free Hypixel API key</p>
     </div>
     <div class="wrap wide">
-      <div class="glow"><div class="shot hero-shot zoom"><img src="img/overview.jpg" srcset="img/overview.jpg 1x, img/overview@2x.jpg 2x" alt="SkyView showing a player's overview: SkyBlock level, networth, skills and equipped gear" width="1400" height="900" fetchpriority="high">
-        <button type="button" class="hs" style="--x: 27.5%; --y: 27%"><span>Their skin in 3D, with the gear they have on around it.</span></button>
-        <button type="button" class="hs" style="--x: 62%; --y: 33.5%"><span>Networth, purse, bank, skill average, Catacombs and fairy souls at a glance.</span></button>
-        <button type="button" class="hs l" style="--x: 7.6%; --y: 17.8%"><span>Every page for this profile, with its number right on the button.</span></button>
-        <button type="button" class="hs r" style="--x: 80.2%; --y: 61%"><span>Their other wardrobe sets. See all opens the Gear page.</span></button></div></div>
+      <div class="glow"><div class="spotlight" data-spots><div class="shot hero-shot zoom"><img src="img/overview.png" srcset="img/overview.png 1400w, img/overview@2x.png 2800w" sizes="(max-width: 1224px) calc(100vw - 44px), 1180px" alt="SkyView showing a player's overview: SkyBlock level, networth, skills and equipped gear" width="1400" height="900" fetchpriority="high"><i class="spot-hl" aria-hidden="true"></i></div><div class="spots hero-spots" role="group" aria-label="What this screen shows"><button type="button" class="spot" data-at="20.1 10 76.4 30.2" aria-pressed="false"><span class="n">01</span><b>The profile, up top</b><span>Their skin in 3D wearing their gear, plus networth, purse, bank, skill average and Catacombs.</span></button><button type="button" class="spot" data-at="20.1 42.4 76.4 30.2" aria-pressed="false"><span class="n">02</span><b>The big numbers</b><span>Networth, skill average, Catacombs, slayers, SkyBlock level, Magical Power and more.</span></button><button type="button" class="spot" data-at="0.3 7.6 17 92" aria-pressed="false"><span class="n">03</span><b>Every page, one click away</b><span>Each page in the sidebar shows its own number, so you see the profile before opening anything.</span></button><button type="button" class="spot" data-at="20.1 74.6 76.4 16.4" aria-pressed="false"><span class="n">04</span><b>What they're wearing</b><span>Armor, equipment and the active pet in your texture pack. Hover any piece for its tooltip.</span></button></div></div></div>
     </div>
   </section>
 
@@ -271,10 +272,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">Every coin,<br>accounted for.</h2>
       <p class="lede reveal">Networth comes from live Bazaar and Auction House prices and refreshes while SkyView is open. It's split by where it sits, from wardrobe to pets, and any part opens an item-by-item breakdown.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/networth.jpg" srcset="img/networth.jpg 1x, img/networth@2x.jpg 2x" alt="The Networth page: totals, a breakdown bar and the most valuable items in each category" width="1400" height="900" loading="lazy">
-      <button type="button" class="hs" style="--x: 29.5%; --y: 23%"><span>Total networth, plus what's left without soulbound or cosmetic items.</span></button>
-      <button type="button" class="hs" style="--x: 45%; --y: 41%"><span>Where it all sits, from inventory to sacks. Click a part for its items.</span></button>
-      <button type="button" class="hs" style="--x: 22.8%; --y: 70%"><span>Every item priced from live Bazaar and Auction House data.</span></button></div></div>
+    <div class="wrap wide"><div class="spotlight" data-spots><div class="shot zoom"><img src="img/networth.png" srcset="img/networth.png 1400w, img/networth@2x.png 2800w" sizes="(max-width: 1124px) calc(100vw - 44px), 1080px" alt="The Networth page: totals, a breakdown bar and the most valuable items in each category" width="1400" height="900" loading="lazy"><i class="spot-hl" aria-hidden="true"></i></div><div class="spots" role="group" aria-label="What this screen shows"><button type="button" class="spot" data-at="20.1 16.5 76.4 14.4" aria-pressed="false"><span class="n">01</span><b>Every way to count it</b><span>Total networth, without soulbound items, without cosmetics, and purse plus bank.</span></button><button type="button" class="spot" data-at="20.1 32.8 76.4 22" aria-pressed="false"><span class="n">02</span><b>Where it all sits</b><span>Inventory, armor, pets, accessories, wardrobe and more. Click a part to list its items.</span></button><button type="button" class="spot" data-at="20.1 57.7 76.4 42" aria-pressed="false"><span class="n">03</span><b>The most valuable items</b><span>Every item priced from live Bazaar and Auction House data.</span></button></div></div></div>
   </section>
 
   <section class="band tint">
@@ -283,10 +281,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">It looks like<br>your game.</h2>
       <p class="lede reveal">Items are drawn with FurfSky Reborn, Hypixel+ and SkyBlock Legacy, the packs you already use in game, down to animated textures and 3D models. Add your own packs or pick more from Modrinth.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/gear.jpg" srcset="img/gear.jpg 1x, img/gear@2x.jpg 2x" alt="The Gear page with armour, equipment and loadouts drawn in FurfSky textures" width="1400" height="900" loading="lazy">
-      <button type="button" class="hs" style="--x: 29.5%; --y: 25.3%"><span>Armour and equipment drawn with your texture pack, FurfSky Reborn here.</span></button>
-      <button type="button" class="hs" style="--x: 34.9%; --y: 49.7%"><span>Every wardrobe slot, with the set they're wearing marked.</span></button>
-      <button type="button" class="hs r" style="--x: 87.4%; --y: 79.6%"><span>Weapons and tools with their stars, reforge and upgrades.</span></button></div></div>
+    <div class="wrap wide"><div class="spotlight" data-spots><div class="shot zoom"><img src="img/gear.png" srcset="img/gear.png 1400w, img/gear@2x.png 2800w" sizes="(max-width: 1124px) calc(100vw - 44px), 1080px" alt="The Gear page with armour, equipment and loadouts drawn in FurfSky textures" width="1400" height="900" loading="lazy"><i class="spot-hl" aria-hidden="true"></i></div><div class="spots" role="group" aria-label="What this screen shows"><button type="button" class="spot" data-at="20.1 16.5 39.5 13.6" aria-pressed="false"><span class="n">01</span><b>Worn right now</b><span>Armor and equipment drawn with your texture pack, FurfSky Reborn here.</span></button><button type="button" class="spot" data-at="20.1 33.1 33.2 35.8" aria-pressed="false"><span class="n">02</span><b>The whole wardrobe</b><span>Every saved set, with the one they're wearing marked.</span></button><button type="button" class="spot" data-at="20.1 71.8 76.4 28" aria-pressed="false"><span class="n">03</span><b>Weapons and tools</b><span>Stars, reforge, recombobulator and hot potato books on each one.</span></button></div></div></div>
     <div class="wrap">
       <div class="points">
         <div class="reveal"><h3>Inventories</h3><p>Inventory, ender chest, backpacks, wardrobe, sacks and the accessory bag, with hover tooltips in the game's own colours.</p></div>
@@ -301,13 +296,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <div class="eyebrow reveal">And it keeps going</div>
       <h2 class="reveal">Built for how<br>SkyBlock is played.</h2>
       <div class="bento">
-        <article class="tile w4 reveal"><span class="k">Skills</span><h3>A page for every skill.</h3><p>What your next level gives, the unlocks still ahead, the best gear for the job and a plan to max it.</p><div class="thumb"><img src="img/skill.jpg" alt="The Farming skill page" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile w4 reveal"><span class="k">Skills</span><h3>A page for every skill.</h3><p>What your next level gives, the unlocks still ahead, the best gear for the job and a plan to max it.</p><div class="thumb"><img src="img/skill.png" srcset="img/skill.png 1400w, img/skill@2x.png 2800w" sizes="(max-width: 860px) calc(100vw - 44px), 720px" alt="The Farming skill page" width="1400" height="900" loading="lazy"></div></article>
         <article class="tile reveal"><span class="k">Advisor</span><h3>What to do next.</h3><p>Upgrades ranked for this profile. Ask it questions with the built-in assistant, a free local AI that runs offline, or Claude with your own key.</p></article>
         <article class="tile reveal"><span class="k">Dungeons</span><h3>Every floor, scored.</h3><p>Each floor's best score, fastest times and completions, plus all five classes.</p></article>
         <article class="tile reveal"><span class="k">Shards</span><h3>All 323 attributes.</h3><p>Your level in each, shards left to the next, what's in your Hunting Box and the Bazaar cost to finish.</p></article>
         <article class="tile reveal"><span class="k">Compare</span><h3>Up to four players, side by side.</h3><p>Level, networth, skills, Catacombs and slayers in one table, with the best in each row marked.</p></article>
-        <article class="tile w3 reveal"><span class="k">Mayor &amp; events</span><h3>SkyBlock time, always on hand.</h3><p>The mayor and minister with their perks, the election and every upcoming event, with alerts before they start.</p><div class="thumb"><img src="img/mayor.jpg" alt="Mayor and events: the SkyBlock clock, the current mayor and upcoming events" width="1400" height="900" loading="lazy"></div></article>
-        <article class="tile w3 reveal"><span class="k">Items &amp; NPCs</span><h3>The whole wiki, offline.</h3><p>Every item with its recipe, where it drops and what it upgrades into. Every NPC with what they sell and where to find them on the map.</p><div class="thumb"><img src="img/items.jpg" alt="The Items page with Hyperion open: stats, lore and its crafting recipe" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile w3 reveal"><span class="k">Mayor &amp; events</span><h3>SkyBlock time, always on hand.</h3><p>The mayor and minister with their perks, the election and every upcoming event, with alerts before they start.</p><div class="thumb"><img src="img/mayor.png" srcset="img/mayor.png 1400w, img/mayor@2x.png 2800w" sizes="(max-width: 860px) calc(100vw - 44px), 720px" alt="Mayor and events: the SkyBlock clock, the current mayor and upcoming events" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile w3 reveal"><span class="k">Items &amp; NPCs</span><h3>The whole wiki, offline.</h3><p>Every item with its recipe, where it drops and what it upgrades into. Every NPC with what they sell and where to find them on the map.</p><div class="thumb"><img src="img/items.png" srcset="img/items.png 1400w, img/items@2x.png 2800w" sizes="(max-width: 860px) calc(100vw - 44px), 720px" alt="The Items page with Hyperion open: stats, lore and its crafting recipe" width="1400" height="900" loading="lazy"></div></article>
         <article class="tile reveal"><span class="k">Anywhere</span><h3>Press <span class="kbd">Ctrl K</span>.</h3><p>Jump to any page, player, item or NPC by typing a few letters.</p></article>
         <article class="tile reveal"><span class="k">Progress</span><h3>See what changed.</h3><p>Look a profile up again and SkyView shows what moved since last time: networth, skills, Catacombs.</p></article>
         <article class="tile reveal"><span class="k">Phone</span><h3>On your phone too.</h3><p>Turn on the phone link and open SkyView on your phone over the same Wi‑Fi.</p></article>
@@ -321,10 +316,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h2 class="reveal">Play SkyBlock<br>straight from SkyView.</h2>
       <p class="lede reveal">Pick your mods, press Install, and SkyView sets up its own Minecraft with Fabric, Skyblocker, SkyHanni, Sodium and more. Sign in on Microsoft's own page; SkyView keeps only an encrypted sign-in token on your computer.</p>
     </div>
-    <div class="wrap wide"><div class="shot zoom"><img src="img/mods.jpg" srcset="img/mods.jpg 1x, img/mods@2x.jpg 2x" alt="The Mods tab with SkyBlock and performance mods to switch on" width="1400" height="900" loading="lazy">
-      <button type="button" class="hs r" style="--x: 88.6%; --y: 21.8%"><span>Install sets up Minecraft, Java, Fabric and your mods in their own folder. Then press Play.</span></button>
-      <button type="button" class="hs" style="--x: 29.2%; --y: 46.4%"><span>Sign in on Microsoft's own page. Only an encrypted sign-in token is kept.</span></button>
-      <button type="button" class="hs" style="--x: 42.7%; --y: 76%"><span>Switch any mod on or off before you play.</span></button></div></div>
+    <div class="wrap wide"><div class="spotlight" data-spots><div class="shot zoom"><img src="img/mods.png" srcset="img/mods.png 1400w, img/mods@2x.png 2800w" sizes="(max-width: 1124px) calc(100vw - 44px), 1080px" alt="The Mods tab with SkyBlock and performance mods to switch on" width="1400" height="900" loading="lazy"><i class="spot-hl" aria-hidden="true"></i></div><div class="spots" role="group" aria-label="What this screen shows"><button type="button" class="spot" data-at="20.1 16.5 76.4 21.2" aria-pressed="false"><span class="n">01</span><b>Install in one click</b><span>SkyView sets up Minecraft, Java, Fabric and your mods in their own folder. Then press Play.</span></button><button type="button" class="spot" data-at="20.1 38.5 76.4 21.5" aria-pressed="false"><span class="n">02</span><b>Signed in safely</b><span>You sign in on Microsoft's own page. SkyView keeps only an encrypted sign-in token.</span></button><button type="button" class="spot" data-at="20.1 61.4 76.4 38.4" aria-pressed="false"><span class="n">03</span><b>Pick your mods</b><span>SkyBlock and performance mods from Modrinth, each switched on or off with a toggle.</span></button></div></div></div>
   </section>
 
   <section id="gallery">
@@ -332,12 +324,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <div class="wrap"><h2 class="reveal">Take a look around.</h2></div>
     </div>
     <div class="gallery" id="gal" tabindex="0" aria-label="Screenshots">
-      <figure><div class="shot"><img src="img/shards.jpg" alt="The Shards page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Shards.</b> Every Hunting attribute as a card.</figcaption></figure>
-      <figure><div class="shot"><img src="img/dungeons.jpg" alt="The Dungeons page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Dungeons.</b> Floors, scores and classes.</figcaption></figure>
-      <figure><div class="shot"><img src="img/accessories.jpg" alt="The Accessories page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Accessories.</b> Magical Power and what to buy next.</figcaption></figure>
-      <figure><div class="shot"><img src="img/npcs.jpg" alt="The NPCs page" width="1600" height="1067" loading="lazy"></div><figcaption><b>NPCs.</b> Shops and where to find everyone.</figcaption></figure>
-      <figure><div class="shot"><img src="img/palette.jpg" alt="The command palette" width="1600" height="1067" loading="lazy"></div><figcaption><b>Ctrl K.</b> Go anywhere in a few keys.</figcaption></figure>
-      <figure><div class="shot"><img src="img/overview-light.jpg" alt="The overview in light mode" width="1600" height="1067" loading="lazy"></div><figcaption><b>Light or dark.</b> It follows your system.</figcaption></figure>
+      <figure><div class="shot"><img src="img/shards.png" srcset="img/shards.png 1104w, img/shards@2x.png 2208w" sizes="(max-width: 860px) 88vw, 760px" alt="The Shards page" width="1104" height="736" loading="lazy"></div><figcaption><b>Shards.</b> Every Hunting attribute as a card.</figcaption></figure>
+      <figure><div class="shot"><img src="img/dungeons.png" srcset="img/dungeons.png 1104w, img/dungeons@2x.png 2208w" sizes="(max-width: 860px) 88vw, 760px" alt="The Dungeons page" width="1104" height="736" loading="lazy"></div><figcaption><b>Dungeons.</b> Floors, scores and classes.</figcaption></figure>
+      <figure><div class="shot"><img src="img/accessories.png" srcset="img/accessories.png 1104w, img/accessories@2x.png 2208w" sizes="(max-width: 860px) 88vw, 760px" alt="The Accessories page" width="1104" height="736" loading="lazy"></div><figcaption><b>Accessories.</b> Magical Power and what to buy next.</figcaption></figure>
+      <figure><div class="shot"><img src="img/npcs.png" srcset="img/npcs.png 1104w, img/npcs@2x.png 2208w" sizes="(max-width: 860px) 88vw, 760px" alt="The NPCs page" width="1104" height="736" loading="lazy"></div><figcaption><b>NPCs.</b> Shops and where to find everyone.</figcaption></figure>
+      <figure><div class="shot"><img src="img/palette.png" srcset="img/palette.png 857w, img/palette@2x.png 1714w" sizes="(max-width: 860px) 88vw, 760px" alt="The command palette" width="857" height="571" loading="lazy"></div><figcaption><b>Ctrl K.</b> Go anywhere in a few keys.</figcaption></figure>
+      <figure><div class="shot"><img src="img/overview-light.png" srcset="img/overview-light.png 1104w, img/overview-light@2x.png 2208w" sizes="(max-width: 860px) 88vw, 760px" alt="The overview in light mode" width="1104" height="736" loading="lazy"></div><figcaption><b>Light or dark.</b> It follows your system.</figcaption></figure>
     </div>
     <div class="gal-nav"><button type="button" class="circle" data-gal="-1" aria-label="Previous screenshot">‹</button><button type="button" class="circle" data-gal="1" aria-label="Next screenshot">›</button></div>
   </section>
@@ -466,7 +458,7 @@ const showShot = (i) => {
   document.getElementById('lbCap').textContent = fig ? fig.querySelector('figcaption').textContent : img.alt;
   const hi = new Image(); // every shot has a 2x copy next to it
   hi.onload = () => { if (shots[at] === img) lbImg.src = hi.src; };
-  hi.src = img.getAttribute('src').replace(/\.jpg$/, '@2x.jpg');
+  hi.src = img.getAttribute('src').replace(/\.(png|jpe?g)$/, '@2x.$1');
 };
 const openShot = (i) => { showShot(i); lb.showModal(); };
 shots.forEach((img, i) => {
@@ -510,6 +502,47 @@ stage.addEventListener('pointermove', (e) => {
   stage.scrollTop = drag.t - dy;
 });
 window.addEventListener('pointerup', () => setTimeout(() => { drag = null; }));
+
+// Feature spotlights: hovering, focusing or tapping a feature under a big screenshot (or pointing at
+// its part of the screenshot) dims the rest; while nobody's pointing, the features take turns.
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('[data-spots]').forEach((group) => {
+  const shot = group.querySelector('.shot');
+  const hl = group.querySelector('.spot-hl');
+  const spots = [...group.querySelectorAll('.spot')];
+  const rects = spots.map((b) => b.dataset.at.split(' ').map(Number));
+  let at = -1;
+  let timer = 0;
+  let held = false;
+  let seen = false;
+  const show = (i, auto) => {
+    at = i;
+    spots.forEach((b, k) => { b.classList.toggle('on', k === i); b.classList.toggle('auto', k === i && auto); b.setAttribute('aria-pressed', String(k === i)); });
+    const [x, y, w, h] = rects[i];
+    Object.assign(hl.style, { left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` });
+    group.classList.add('lit');
+  };
+  const cycle = () => {
+    clearTimeout(timer);
+    if (held || !seen || calm) return;
+    timer = setTimeout(() => { show((at + 1) % spots.length, true); cycle(); }, 4200);
+  };
+  const hold = (i) => { held = true; clearTimeout(timer); if (i !== at || spots[i].classList.contains('auto')) show(i, false); };
+  spots.forEach((b, i) => ['mouseenter', 'focus', 'click'].forEach((ev) => b.addEventListener(ev, () => hold(i))));
+  shot.addEventListener('mousemove', (e) => {
+    const r = shot.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * 100;
+    const py = ((e.clientY - r.top) / r.height) * 100;
+    const i = rects.findIndex(([x, y, w, h]) => px >= x && px <= x + w && py >= y && py <= y + h);
+    if (i >= 0) hold(i);
+  });
+  group.addEventListener('mouseleave', () => { held = false; cycle(); });
+  new IntersectionObserver(([e]) => {
+    seen = e.isIntersecting;
+    if (seen && at < 0) show(0, !calm);
+    cycle();
+  }, { threshold: 0.5 }).observe(shot);
+});
 </script>
 <!--/body-->
 </body>
