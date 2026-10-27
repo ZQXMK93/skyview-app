@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--page-->
+<title>SkyView</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="SkyView is a free desktop app for Hypixel SkyBlock: any player's networth, skills, dungeons, slayers and inventories, drawn with the texture packs you play with.">
+<link rel="icon" href="img/icon.png">
+<style>
+/* Layout: one centred column (980px, Apple-store width) of full-bleed bands; product shots break wider. */
+:root {
+  --bg: #fbfbfd; --bg-2: #f2f2f6; --fg: #1d1d1f; --fg-2: #6e6e73; --line: rgba(0, 0, 0, .1);
+  --card: #ffffff; --accent: #7a5cf0; --accent-2: #c2577f; --on-accent: #ffffff;
+  --glass: rgba(251, 251, 253, .72); --shot-shadow: 0 30px 80px -30px rgba(40, 20, 90, .45), 0 0 0 1px rgba(0, 0, 0, .06);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --ease: cubic-bezier(.28, .11, .32, 1);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #000000; --bg-2: #0d0d12; --fg: #f5f5f7; --fg-2: #a1a1a6; --line: rgba(255, 255, 255, .12);
+  --card: #141419; --accent: #a993ff; --accent-2: #f08fb4; --on-accent: #12101c;
+  --glass: rgba(0, 0, 0, .66); --shot-shadow: 0 30px 90px -20px rgba(150, 110, 255, .35), 0 0 0 1px rgba(255, 255, 255, .08); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #000000; --bg-2: #0d0d12; --fg: #f5f5f7; --fg-2: #a1a1a6; --line: rgba(255, 255, 255, .12);
+  --card: #141419; --accent: #a993ff; --accent-2: #f08fb4; --on-accent: #12101c;
+  --glass: rgba(0, 0, 0, .66); --shot-shadow: 0 30px 90px -20px rgba(150, 110, 255, .35), 0 0 0 1px rgba(255, 255, 255, .08); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.47 var(--font); letter-spacing: -0.022em; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--glass); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; height: auto; display: block; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+.wrap { width: 100%; max-width: 980px; margin: 0 auto; padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.wide { max-width: 1180px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.03em; }
+.eyebrow { font-size: 17px; font-weight: 600; color: var(--accent-2); letter-spacing: -0.01em; }
+.muted { color: var(--fg-2); }
+
+/* ---- nav: frosted, sticky */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .wrap { display: flex; align-items: center; gap: 28px; height: 52px; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--fg); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 24px; height: 24px; }
+.nav-links { display: flex; gap: 24px; margin-left: auto; font-size: 13px; }
+.nav-links a { color: var(--fg); opacity: .8; }
+.nav-links a:hover { opacity: 1; text-decoration: none; }
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 980px; font: 500 15px var(--font); letter-spacing: -0.01em; cursor: pointer; transition: transform .25s var(--ease), filter .2s, background .2s; }
+.pill.sm { height: 28px; padding: 0 14px; font-size: 13px; }
+.pill.lg { height: 48px; padding: 0 26px; font-size: 17px; }
+.pill.fill { background: var(--accent); color: var(--on-accent); }
+.pill.fill:hover { filter: brightness(1.08); text-decoration: none; }
+.pill.ghost { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pill.ghost:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); text-decoration: none; }
+.pill:active { transform: scale(.97); }
+.pill[aria-disabled="true"] { opacity: .55; cursor: default; pointer-events: none; }
+
+/* ---- hero */
+.hero { padding-block: 72px 24px; text-align: center; overflow: hidden; }
+.hero .eyebrow { margin-bottom: 10px; }
+.hero h1 { font-size: clamp(44px, 8vw, 88px); line-height: 1.04; font-weight: 700; }
+.grad { background: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lede { max-width: 640px; margin: 22px auto 0; font-size: clamp(19px, 2.4vw, 24px); line-height: 1.38; color: var(--fg-2); }
+.cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 32px; }
+.fine { margin-top: 14px; font-size: 13px; color: var(--fg-2); }
+.load-in > * { animation: rise 1s var(--ease) both; }
+.load-in > *:nth-child(2) { animation-delay: .08s; }
+.load-in > *:nth-child(3) { animation-delay: .16s; }
+.load-in > *:nth-child(4) { animation-delay: .24s; }
+.load-in > *:nth-child(5) { animation-delay: .32s; }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+
+/* product shot in a window frame */
+.shot { position: relative; margin-inline: auto; border-radius: 14px; overflow: hidden; box-shadow: var(--shot-shadow); background: #0e0e13; }
+.shot img { width: 100%; height: auto; aspect-ratio: 14 / 9; }
+.gallery .shot img { aspect-ratio: 3 / 2; } /* gallery shots are 3:2 crops of one feature */
+.hero-shot { max-width: 1180px; margin-top: 56px; }
+.glow { position: relative; }
+.glow::before { content: ""; position: absolute; inset: 8% 10% -6%; background: radial-gradient(50% 50% at 30% 50%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 70%), radial-gradient(45% 50% at 72% 55%, color-mix(in srgb, var(--accent-2) 38%, transparent), transparent 70%); filter: blur(60px); z-index: -1; opacity: .7; }
+
+/* ---- numbers */
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding-block: 72px 24px; text-align: center; }
+.facts b { display: block; font: 700 clamp(34px, 5vw, 52px)/1 var(--display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.facts span { display: block; margin-top: 8px; font-size: 14px; color: var(--fg-2); }
+
+/* ---- feature bands */
+.band { padding-block: 110px 40px; text-align: center; }
+.band h2 { font-size: clamp(36px, 6vw, 64px); line-height: 1.06; font-weight: 700; }
+.band p.lede { max-width: 660px; margin: 20px auto 0; font-size: clamp(18px, 2.2vw, 21px); color: var(--fg-2); }
+.band .shot { max-width: 1080px; margin-top: 48px; }
+.band.tint { background: var(--bg-2); }
+.points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; max-width: 900px; margin: 48px auto 0; text-align: left; }
+.points h3 { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.points p { margin: 6px 0 0; font-size: 15px; color: var(--fg-2); }
+
+/* ---- bento */
+.bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: 48px; text-align: left; }
+.tile { grid-column: span 2; position: relative; display: flex; flex-direction: column; gap: 8px; min-height: 220px; padding: 28px; border-radius: 22px; background: var(--card); box-shadow: 0 0 0 1px var(--line); overflow: hidden; transition: transform .5s var(--ease), box-shadow .3s; }
+.tile:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 0 0 1px var(--line), 0 20px 40px -24px rgba(0, 0, 0, .35); }
+.tile.w3 { grid-column: span 3; }
+.tile.w4 { grid-column: span 4; }
+.tile .k { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0; text-transform: uppercase; }
+.tile h3 { font-size: 24px; line-height: 1.15; font-weight: 700; }
+.tile p { margin: 0; font-size: 15px; color: var(--fg-2); }
+.tile .thumb { margin: auto -28px -28px; padding-top: 18px; }
+.tile .thumb img { width: 100%; border-radius: 12px 12px 0 0; box-shadow: 0 0 0 1px var(--line); }
+.kbd { display: inline-block; padding: 1px 7px; border-radius: 6px; font: 600 13px var(--font); background: var(--bg-2); box-shadow: inset 0 -1px 0 var(--line), 0 0 0 1px var(--line); }
+
+/* ---- gallery: snap scroller */
+.gallery { display: grid; grid-auto-flow: column; grid-auto-columns: min(78%, 760px); gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 40px max(22px, calc((100% - 980px) / 2)) 20px; scrollbar-width: none; }
+.gallery::-webkit-scrollbar { display: none; }
+.gallery figure { margin: 0; scroll-snap-align: center; }
+.gallery figcaption { margin-top: 14px; font-size: 15px; color: var(--fg-2); text-align: center; }
+.gallery figcaption b { color: var(--fg); font-weight: 600; }
+.gal-nav { display: flex; justify-content: center; gap: 12px; padding-bottom: 20px; }
+.circle { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--card); color: var(--fg); box-shadow: 0 0 0 1px var(--line); font-size: 18px; cursor: pointer; transition: transform .2s var(--ease); }
+.circle:hover { transform: scale(1.06); }
+
+/* ---- pricing */
+.plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 820px; margin: 48px auto 0; text-align: left; }
+.plan { display: flex; flex-direction: column; gap: 14px; padding: 34px; border-radius: 24px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.plan.pro { box-shadow: 0 0 0 2px var(--accent), 0 30px 60px -36px color-mix(in srgb, var(--accent) 80%, transparent); }
+.plan h3 { font-size: 28px; font-weight: 700; }
+.price { font: 700 48px/1 var(--display); letter-spacing: -0.04em; }
+.price small { font-size: 17px; font-weight: 500; color: var(--fg-2); letter-spacing: -0.01em; }
+.plan ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
+.plan li { display: flex; gap: 10px; }
+.plan li::before { content: "✓"; color: var(--accent); font-weight: 700; }
+.plan li.tbd { color: var(--fg-2); font-style: italic; }
+.plan li.tbd::before { content: "+"; }
+.plan .pill { margin-top: auto; align-self: flex-start; }
+
+/* ---- downloads */
+.dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 48px; text-align: left; }
+.os { display: flex; flex-direction: column; gap: 6px; padding: 26px; border-radius: 20px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.os.mine { box-shadow: 0 0 0 2px var(--accent); }
+.os h3 { font-size: 22px; font-weight: 700; }
+.os p { margin: 0 0 12px; font-size: 14px; color: var(--fg-2); }
+.os .pill { margin-top: auto; align-self: flex-start; }
+
+/* ---- faq */
+.faq { max-width: 760px; margin: 40px auto 0; text-align: left; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; padding: 22px 0; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--accent); font-weight: 400; font-size: 24px; line-height: 1; transition: transform .35s var(--ease); }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { margin: 0 0 22px; color: var(--fg-2); }
+
+footer { padding-block: 40px 60px; margin-top: 100px; border-top: 1px solid var(--line); font-size: 12px; color: var(--fg-2); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+/* ---- scroll transitions: visible at rest, animated where the browser ties them to scrolling */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+    .zoom { animation: zoom linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
+    @keyframes reveal { from { opacity: .15; transform: translateY(40px); } }
+    @keyframes zoom { from { transform: scale(.88) perspective(1200px) rotateX(10deg); opacity: .4; } }
+  }
+}
+@media (prefers-reduced-motion: reduce) { .load-in > * { animation: none; } html { scroll-behavior: auto; } .tile, .pill, .circle { transition: none; } }
+
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .nav .pill { margin-left: auto; }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; }
+  .points, .dl { grid-template-columns: minmax(0, 1fr); }
+  .bento { grid-template-columns: minmax(0, 1fr); }
+  .tile, .tile.w3, .tile.w4 { grid-column: auto; min-height: 0; }
+  .plans { grid-template-columns: minmax(0, 1fr); }
+  .gallery { grid-auto-columns: 88%; }
+  .band { padding-block: 80px 24px; }
+}
+</style>
+<!--/head-->
+</head>
+<body>
+<!--body-->
+<nav class="nav" id="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="img/icon.png" alt="">SkyView</a>
+    <div class="nav-links"><a href="#features">Features</a><a href="#gallery">Gallery</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
+    <a class="pill fill sm" href="#download">Download</a>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap load-in">
+      <div class="eyebrow">For Hypixel SkyBlock</div>
+      <h1>Your whole SkyBlock profile.<br><span class="grad">One window.</span></h1>
+      <p class="lede">SkyView is a free desktop app that reads any player's SkyBlock profile and lays it all out: networth, skills, dungeons, slayers and inventories, drawn with the texture packs you play with.</p>
+      <div class="cta">
+        <a class="pill fill lg" id="heroDownload" href="#download">Download for Windows</a>
+        <a class="pill ghost lg" href="#features">See what it does</a>
+      </div>
+      <p class="fine">Free · Windows, macOS and Linux · Uses your free Hypixel API key</p>
+    </div>
+    <div class="wrap wide">
+      <div class="glow"><div class="shot hero-shot zoom"><img src="img/overview.jpg" alt="SkyView showing a player's overview: SkyBlock level, networth, skills and equipped gear" width="1400" height="900" fetchpriority="high"></div></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="facts reveal">
+      <div><b>43</b><span>pages for every part of a profile</span></div>
+      <div><b>7,000+</b><span>items with recipes and drops</span></div>
+      <div><b>323</b><span>Hunting shard attributes tracked</span></div>
+      <div><b>3</b><span>texture packs ready to go</span></div>
+    </div>
+  </div>
+
+  <section class="band" id="features">
+    <div class="wrap">
+      <div class="eyebrow reveal">Networth</div>
+      <h2 class="reveal">Every coin,<br>accounted for.</h2>
+      <p class="lede reveal">Networth comes from live Bazaar and Auction House prices and refreshes while SkyView is open. It's split by where it sits, from wardrobe to pets, and any part opens an item-by-item breakdown.</p>
+    </div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/networth.jpg" alt="The Networth page: totals, a breakdown bar and the most valuable items in each category" width="1400" height="900" loading="lazy"></div></div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap">
+      <div class="eyebrow reveal">Texture packs</div>
+      <h2 class="reveal">It looks like<br>your game.</h2>
+      <p class="lede reveal">Items are drawn with FurfSky Reborn, Hypixel+ and SkyBlock Legacy, the packs you already use in game, down to animated textures and 3D models. Add your own packs or pick more from Modrinth.</p>
+    </div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/gear.jpg" alt="The Gear page with armour, equipment and loadouts drawn in FurfSky textures" width="1400" height="900" loading="lazy"></div></div>
+    <div class="wrap">
+      <div class="points">
+        <div class="reveal"><h3>Inventories</h3><p>Inventory, ender chest, backpacks, wardrobe, sacks and the accessory bag, with hover tooltips in the game's own colours.</p></div>
+        <div class="reveal"><h3>Missing accessories</h3><p>Every accessory you don't own yet, sorted by Magical Power per coin.</p></div>
+        <div class="reveal"><h3>Pets</h3><p>Levels, held items and your pet score, with each pet's skin.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="eyebrow reveal">And it keeps going</div>
+      <h2 class="reveal">Built for how<br>SkyBlock is played.</h2>
+      <div class="bento">
+        <article class="tile w4 reveal"><span class="k">Skills</span><h3>A page for every skill.</h3><p>What your next level gives, the unlocks still ahead, the best gear for the job and a plan to max it.</p><div class="thumb"><img src="img/skill.jpg" alt="The Farming skill page" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile reveal"><span class="k">Advisor</span><h3>What to do next.</h3><p>Upgrades ranked for this profile. Ask it questions with the built-in assistant, a free local AI that runs offline, or Claude with your own key.</p></article>
+        <article class="tile reveal"><span class="k">Dungeons</span><h3>Every floor, scored.</h3><p>Each floor's best score, fastest times and completions, plus all five classes.</p></article>
+        <article class="tile reveal"><span class="k">Shards</span><h3>All 323 attributes.</h3><p>Your level in each, shards left to the next, what's in your Hunting Box and the Bazaar cost to finish.</p></article>
+        <article class="tile reveal"><span class="k">Compare</span><h3>Up to four players, side by side.</h3><p>Level, networth, skills, Catacombs and slayers in one table, with the best in each row marked.</p></article>
+        <article class="tile w3 reveal"><span class="k">Mayor &amp; events</span><h3>SkyBlock time, always on hand.</h3><p>The mayor and minister with their perks, the election and every upcoming event, with alerts before they start.</p><div class="thumb"><img src="img/mayor.jpg" alt="Mayor and events: the SkyBlock clock, the current mayor and upcoming events" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile w3 reveal"><span class="k">Items &amp; NPCs</span><h3>The whole wiki, offline.</h3><p>Every item with its recipe, where it drops and what it upgrades into. Every NPC with what they sell and where to find them on the map.</p><div class="thumb"><img src="img/items.jpg" alt="The Items page with Hyperion open: stats, lore and its crafting recipe" width="1400" height="900" loading="lazy"></div></article>
+        <article class="tile reveal"><span class="k">Anywhere</span><h3>Press <span class="kbd">Ctrl K</span>.</h3><p>Jump to any page, player, item or NPC by typing a few letters.</p></article>
+        <article class="tile reveal"><span class="k">Progress</span><h3>See what changed.</h3><p>Look a profile up again and SkyView shows what moved since last time: networth, skills, Catacombs.</p></article>
+        <article class="tile reveal"><span class="k">Phone</span><h3>On your phone too.</h3><p>Turn on the phone link and open SkyView on your phone over the same Wi‑Fi.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap">
+      <div class="eyebrow reveal">Mods</div>
+      <h2 class="reveal">Play SkyBlock<br>straight from SkyView.</h2>
+      <p class="lede reveal">Pick your mods, press Install, and SkyView sets up its own Minecraft with Fabric, Skyblocker, SkyHanni, Sodium and more. Sign in on Microsoft's own page; SkyView keeps only an encrypted sign-in token on your computer.</p>
+    </div>
+    <div class="wrap wide"><div class="shot zoom"><img src="img/mods.jpg" alt="The Mods tab with SkyBlock and performance mods to switch on" width="1400" height="900" loading="lazy"></div></div>
+  </section>
+
+  <section id="gallery">
+    <div class="band" style="padding-bottom: 0">
+      <div class="wrap"><h2 class="reveal">Take a look around.</h2></div>
+    </div>
+    <div class="gallery" id="gal" tabindex="0" aria-label="Screenshots">
+      <figure><div class="shot"><img src="img/shards.jpg" alt="The Shards page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Shards.</b> Every Hunting attribute as a card.</figcaption></figure>
+      <figure><div class="shot"><img src="img/dungeons.jpg" alt="The Dungeons page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Dungeons.</b> Floors, scores and classes.</figcaption></figure>
+      <figure><div class="shot"><img src="img/accessories.jpg" alt="The Accessories page" width="1600" height="1067" loading="lazy"></div><figcaption><b>Accessories.</b> Magical Power and what to buy next.</figcaption></figure>
+      <figure><div class="shot"><img src="img/npcs.jpg" alt="The NPCs page" width="1600" height="1067" loading="lazy"></div><figcaption><b>NPCs.</b> Shops and where to find everyone.</figcaption></figure>
+      <figure><div class="shot"><img src="img/palette.jpg" alt="The command palette" width="1600" height="1067" loading="lazy"></div><figcaption><b>Ctrl K.</b> Go anywhere in a few keys.</figcaption></figure>
+      <figure><div class="shot"><img src="img/overview-light.jpg" alt="The overview in light mode" width="1600" height="1067" loading="lazy"></div><figcaption><b>Light or dark.</b> It follows your system.</figcaption></figure>
+    </div>
+    <div class="gal-nav"><button type="button" class="circle" data-gal="-1" aria-label="Previous screenshot">‹</button><button type="button" class="circle" data-gal="1" aria-label="Next screenshot">›</button></div>
+  </section>
+
+  <section class="band" id="pricing">
+    <div class="wrap">
+      <h2 class="reveal">Free. Or a little extra.</h2>
+      <p class="lede reveal">Everything on this page is in the free version. Pro is a one-time $5 for a few extras, and it helps keep SkyView going.</p>
+      <div class="plans">
+        <div class="plan reveal">
+          <h3>SkyView</h3>
+          <div class="price">Free</div>
+          <ul>
+            <li>Every profile page, for any player</li>
+            <li>Live networth and prices</li>
+            <li>Texture packs, including your own</li>
+            <li>Advisor, Compare and Ctrl K</li>
+            <li>Mayor, events, items and NPCs</li>
+            <li>The Mods tab and phone link</li>
+          </ul>
+          <a class="pill ghost lg" href="#download">Download</a>
+        </div>
+        <div class="plan pro reveal">
+          <h3>SkyView Pro</h3>
+          <div class="price">$5 <small>once</small></div>
+          <ul id="proList">
+            <li>Everything in SkyView</li>
+            <li class="tbd">Pro feature, coming soon</li>
+            <li class="tbd">Pro feature, coming soon</li>
+            <li class="tbd">Pro feature, coming soon</li>
+          </ul>
+          <a class="pill fill lg" id="buyPro" href="#pricing">Get Pro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band tint" id="download">
+    <div class="wrap">
+      <h2 class="reveal">Download SkyView.</h2>
+      <p class="lede reveal">The latest version for your computer. It updates from the same place.</p>
+      <div class="dl">
+        <div class="os reveal" data-os="win"><h3>Windows</h3><p>Installer or portable .exe, Windows 10 and 11.</p><a class="pill fill" data-dl href="#">Download</a></div>
+        <div class="os reveal" data-os="mac"><h3>macOS</h3><p>.dmg for Apple silicon and Intel Macs.</p><a class="pill fill" data-dl href="#">Download</a></div>
+        <div class="os reveal" data-os="linux"><h3>Linux</h3><p>AppImage or .deb for 64-bit Linux.</p><a class="pill fill" data-dl href="#">Download</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq" style="padding-top: 90px">
+    <div class="wrap">
+      <h2 class="reveal">Questions.</h2>
+      <div class="faq">
+        <details><summary>Is SkyView free?</summary><p>Yes. Everything above is free, for as many players as you like. Pro is an optional one-time $5.</p></details>
+        <details><summary>What do I need?</summary><p>A free Hypixel API key from developer.hypixel.net, pasted into SkyView's Settings. Development keys expire every three days, so you paste a fresh one now and then.</p></details>
+        <details><summary>Why does Windows or macOS warn me when I open it?</summary><p>SkyView isn't code-signed yet. On Windows choose More info, then Run anyway. On a Mac, right-click SkyView and choose Open the first time.</p></details>
+        <details><summary>Is my Minecraft account safe?</summary><p>Profiles come from Hypixel's public API and SkyView only reads them. The Mods tab signs in on Microsoft's own page and keeps an encrypted sign-in token on your computer, nowhere else.</p></details>
+        <details><summary>Does it work offline?</summary><p>Looking players up needs the internet. The item list, NPCs and the local AI keep working offline once they've been downloaded.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>SkyView is not affiliated with Hypixel Inc., Mojang Studios or Microsoft.</span>
+    <span>© <span id="year">2026</span> SkyView</span>
+  </div>
+</footer>
+
+<script>
+// Fill these in: where the downloads live (a public GitHub releases page), and the checkout link
+// for Pro (Gumroad, Lemon Squeezy or a Stripe payment link). Pro stays "Coming soon" until then.
+const SITE = {
+  releases: 'https://github.com/ZQXMK93/skyview-app/releases/latest',
+  checkout: '',
+};
+
+const os = (() => {
+  const p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '').toLowerCase();
+  return /mac|iphone|ipad/.test(p) ? 'mac' : /linux|x11/.test(p) && !/android/.test(p) ? 'linux' : 'win';
+})();
+const osName = { win: 'Windows', mac: 'macOS', linux: 'Linux' }[os];
+document.getElementById('heroDownload').textContent = `Download for ${osName}`;
+document.querySelectorAll('[data-dl]').forEach((a) => { a.href = SITE.releases; a.target = '_blank'; a.rel = 'noopener'; });
+const mine = document.querySelector(`.os[data-os="${os}"]`);
+if (mine) mine.classList.add('mine');
+
+const buy = document.getElementById('buyPro');
+if (SITE.checkout) { buy.href = SITE.checkout; buy.target = '_blank'; buy.rel = 'noopener'; }
+else { buy.textContent = 'Coming soon'; buy.setAttribute('aria-disabled', 'true'); }
+
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+const gal = document.getElementById('gal');
+document.querySelectorAll('[data-gal]').forEach((b) => b.addEventListener('click', () => {
+  const step = gal.querySelector('figure').getBoundingClientRect().width + 20;
+  gal.scrollBy({ left: Number(b.dataset.gal) * step, behavior: 'smooth' });
+}));
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+<!--/body-->
+</body>
+</html>
