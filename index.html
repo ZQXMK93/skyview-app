@@ -192,7 +192,7 @@ html:has(.lb[open]) { overflow: hidden; }
 .plan .pill { margin-top: auto; align-self: flex-start; }
 
 /* ---- downloads */
-.dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 48px; text-align: left; }
+.dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 48px; text-align: left; }
 .os { display: flex; flex-direction: column; gap: 6px; padding: 26px; border-radius: 20px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
 .os.mine { box-shadow: 0 0 0 2px var(--accent); }
 .os h3 { font-size: 22px; font-weight: 700; }
@@ -314,7 +314,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <article class="tile w3 reveal"><span class="k">Items &amp; NPCs</span><h3>The whole wiki, offline.</h3><p>Every item with its recipe, where it drops and what it upgrades into. Every NPC with what they sell and where to find them on the map.</p><div class="thumb"><img src="img/items.png" srcset="img/items.png 1400w, img/items@2x.png 2800w" sizes="(max-width: 860px) calc(100vw - 44px), 720px" alt="The Items page with Hyperion open: stats, lore and its crafting recipe" width="1400" height="900" loading="lazy"></div></article>
         <article class="tile reveal"><span class="k">Anywhere</span><h3>Press <span class="kbd">Ctrl K</span>.</h3><p>Jump to any page, player, item or NPC by typing a few letters.</p></article>
         <article class="tile reveal"><span class="k">Progress</span><h3>See what changed.</h3><p>Look a profile up again and SkyView shows what moved since last time: networth, skills, Catacombs. Click the networth line for every day of it, and the gain since you joined the profile.</p></article>
-        <article class="tile reveal"><span class="k">Phone</span><h3>On your phone too.</h3><p>Turn on the phone link and open SkyView on your phone over the same Wi‑Fi.</p></article>
+        <article class="tile reveal"><span class="k">Phone</span><h3>On your phone too.</h3><p>The iPhone app runs on its own. Or turn on the phone link and open SkyView on your phone over the same Wi‑Fi.</p></article>
       </div>
     </div>
   </section>
@@ -384,6 +384,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <div class="os reveal" data-os="win"><h3>Windows</h3><p>Installer or portable .exe, Windows 10 and 11.</p><a class="pill fill" data-dl href="#">Download</a></div>
         <div class="os reveal" data-os="mac"><h3>macOS</h3><p>.dmg for Apple silicon and Intel Macs.</p><a class="pill fill" data-dl href="#">Download</a></div>
         <div class="os reveal" data-os="linux"><h3>Linux</h3><p>AppImage or .deb for 64-bit Linux.</p><a class="pill fill" data-dl href="#">Download</a></div>
+        <div class="os reveal" data-os="ios"><h3>iPhone</h3><p>.ipa to sideload with Sideloadly or AltStore. Runs on the phone itself, no computer needed.</p><a class="pill fill" data-dl href="#">Download</a></div>
       </div>
     </div>
   </section>
@@ -395,6 +396,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <details><summary>Is SkyView free?</summary><p>Yes. Everything above is free, for as many players as you like. Pro is an optional one-time $5.</p></details>
         <details><summary>What do I need?</summary><p>A free Hypixel API key from developer.hypixel.net, pasted into SkyView's Settings. Development keys expire every three days, so you paste a fresh one now and then.</p></details>
         <details><summary>Why does Windows or macOS warn me when I open it?</summary><p>SkyView isn't code-signed yet. On Windows choose More info, then Run anyway. On a Mac, right-click SkyView and choose Open the first time.</p></details>
+        <details><summary>How do I put it on my iPhone?</summary><p>It isn't on the App Store, so you sideload it: download the .ipa, install Sideloadly (or AltStore) on your computer, connect your iPhone with a cable and drop the .ipa on it, signing in with your Apple ID. Then on the iPhone, trust your Apple ID under Settings, General, VPN &amp; Device Management, and turn on Developer Mode if it asks. With a free Apple ID it has to be installed again every 7 days (AltStore can do that for you).</p></details>
         <details><summary>Is my Minecraft account safe?</summary><p>Profiles come from Hypixel's public API and SkyView only reads them. The Mods tab signs in on Microsoft's own page and keeps an encrypted sign-in token on your computer, nowhere else.</p></details>
         <details><summary>Will it slow my PC down?</summary><p>No. In the background SkyView uses next to no CPU or graphics: its animations hold still and it stops refreshing while minimised. Texture packs take a fraction of the memory they used to.</p></details>
         <details><summary>Does it work offline?</summary><p>Looking players up needs the internet. The item list, NPCs and the local AI keep working offline once they've been downloaded.</p></details>
@@ -426,9 +428,9 @@ const SITE = {
 
 const os = (() => {
   const p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '').toLowerCase();
-  return /mac|iphone|ipad/.test(p) ? 'mac' : /linux|x11/.test(p) && !/android/.test(p) ? 'linux' : 'win';
+  return /iphone|ipad/.test(p) ? 'ios' : /mac/.test(p) ? 'mac' : /linux|x11/.test(p) && !/android/.test(p) ? 'linux' : 'win';
 })();
-const osName = { win: 'Windows', mac: 'macOS', linux: 'Linux' }[os];
+const osName = { win: 'Windows', mac: 'macOS', linux: 'Linux', ios: 'iPhone' }[os];
 document.getElementById('heroDownload').textContent = `Download for ${osName}`;
 document.querySelectorAll('[data-dl]').forEach((a) => { a.href = SITE.releases; a.target = '_blank'; a.rel = 'noopener'; });
 const mine = document.querySelector(`.os[data-os="${os}"]`);
